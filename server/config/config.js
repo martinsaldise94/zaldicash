@@ -1,9 +1,10 @@
-require("dotenv").config({ path: "../.env" }); // Buscamos el .env que está en la raíz de /server
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") }); // Buscamos el .env que está en la raíz de /server
 
 module.exports = {
   development: {
     username: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD || null,
+    password: String(process.env.DB_PASSWORD),
     database: process.env.DB_DATABASE || "zaldicash_db",
     host: process.env.DB_HOST || "127.0.0.1",
     port: process.env.DB_PORT || 5432,
