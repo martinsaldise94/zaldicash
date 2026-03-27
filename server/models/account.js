@@ -8,14 +8,19 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      //una cuenta pertenece a un usuario y hace varias transacciones
+      this.belongsTo(models.User, { foreignKey: "userId", as: "owner" });
+      this.hasMany(models.Transaction, {
+        foreignKey: "accountId",
+        as: "transactions",
+      });
     }
   }
   Account.init(
     {
       name: DataTypes.STRING,
       type: DataTypes.STRING,
-      balance: DataTypes.DECIMAL(15,2),
+      balance: DataTypes.DECIMAL(15, 2),
       userId: DataTypes.INTEGER,
     },
     {
