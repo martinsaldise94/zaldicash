@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { User } = require("../models");
+
+//middleware de validación de usuario
+const userValidation = require("../middlewares/userValidation");
+
+//controlador (más pro que como hacía antes)
+const userController = require("../controllers/userController");
 
 // POST a /api/users/register
-router.post("/register", )
+router.post("/register", userValidation, userController.register);
+
+module.exports = router;
