@@ -10,4 +10,7 @@ const userController = require("../controllers/userController");
 // POST a /api/users/register
 router.post("/register", userValidation, userController.register);
 
+//POST a /api/users/login
+router.post('/login', userController.login);
+
 module.exports = router;

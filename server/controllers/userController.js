@@ -1,5 +1,6 @@
 const userRepository = require("../repositories/userRepo");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const userController = {
   register: async (req, res) => {
@@ -30,6 +31,40 @@ const userController = {
         error: "Error interno del servidor",
         details: error.message,
       });
+    }
+  },
+  login: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      //encontramos el usuario buscándolo por el mail
+      const user = await userRepository.getByMail(email);
+      if (!user) {
+        return res.status(401).json({ error: "Credenciales inválidas" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password_hash);
+      if (!isMatch) {
+        return res.status(401).json({ error: "Credenciales inválidas" });
+      }
+
+      //generamos token
+      const token = jwt.sign(
+        { id: user.id, username: user.username },
+        process.env.JWT_SECRET || "clave_secreta_provisional",
+        { expiresIn: "24h" },
+      );
+
+      //todo bien
+      res.json({
+        message: "Login exitoso",
+        token,
+        user: { id: user.id, username: user.username },
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: "Error en el servidor", details: error.message });
     }
   },
 };
