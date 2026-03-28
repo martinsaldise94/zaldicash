@@ -51,7 +51,7 @@ const userController = {
       //generamos token
       const token = jwt.sign(
         { id: user.id, username: user.username },
-        process.env.JWT_SECRET || "clave_secreta_provisional",
+        process.env.JWT_SECRET,
         { expiresIn: "24h" },
       );
 
