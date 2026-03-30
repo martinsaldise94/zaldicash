@@ -4,6 +4,7 @@ const db = require("./models");
 require("dotenv").config();
 
 const userRoutes = require("./routes/userRoutes");
+const accountRoutes = require("./routes/accountRoutes");
 const investmentRoutes = require("./routes/investmentRoutes");
 const app = express();
 
@@ -18,6 +19,7 @@ app.get("/api/status", (req, res) => {
 
 //declaración de rutas
 app.use("/api/users", userRoutes);
+app.use("/api/accounts", accountRoutes);
 app.use("/api/investments", investmentRoutes);
 
 //-------------------------------------------------------------------------------------------------
