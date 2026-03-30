@@ -1,37 +1,44 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Account extends Model {
+  class Investment extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      //una cuenta pertenece a un usuario y hace varias transacciones
-      this.belongsTo(models.User, { foreignKey: "userId", as: "owner" });
+      // una inversión pertenece a un usuario
+      this.belongsTo(models.User, {
+        foreignKey: "userId",
+        as: "user",
+      });
+
+      //no se si esta es necesaria
       this.hasMany(models.Transaction, {
-        foreignKey: "accountId",
+        foreignKey: "investmentId",
         as: "transactions",
       });
-      this.hasMany(models.Investment, {
+      this.belongsTo(models.Account, {
         foreignKey: "accountId",
-        as: "investments",
+        as: "account",
       });
     }
   }
-  Account.init(
+  Investment.init(
     {
       name: DataTypes.STRING,
-      type: DataTypes.STRING,
-      balance: DataTypes.DECIMAL(15, 2),
+      category: DataTypes.STRING,
+      initial_amount: DataTypes.DECIMAL,
+      current_amount: DataTypes.DECIMAL,
+      status: DataTypes.STRING,
       userId: DataTypes.INTEGER,
     },
     {
       sequelize,
-      modelName: "Account",
-      tableName: "accounts",
+      modelName: "Investment",
+      tableName: "investments",
     },
   );
-  return Account;
+  return Investment;
 };

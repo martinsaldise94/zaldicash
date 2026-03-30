@@ -9,10 +9,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // una transacción a un usuario y a una cuenta en concretoo
-      this.belongsTo(models.User, { foreignKey: "userId" });
+      this.belongsTo(models.User, { foreignKey: "userId", as: "user" });
       this.belongsTo(models.Account, {
         foreignKey: "accountId",
         as: "account",
+      });
+      this.belongsTo(models.Investment, {
+        foreignKey: "investmentId",
+        as: "investment",
       });
     }
   }
@@ -28,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Transaction",
+      tableName: "transactions"
     },
   );
   return Transaction;

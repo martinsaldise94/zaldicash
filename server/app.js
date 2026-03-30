@@ -4,6 +4,7 @@ const db = require("./models");
 require("dotenv").config();
 
 const userRoutes = require("./routes/userRoutes");
+const investmentRoutes = require("./routes/investmentRoutes");
 const app = express();
 
 //Middlewares
@@ -17,6 +18,7 @@ app.get("/api/status", (req, res) => {
 
 //declaración de rutas
 app.use("/api/users", userRoutes);
+app.use("/api/investments", investmentRoutes);
 
 //-------------------------------------------------------------------------------------------------
 const PORT = process.env.PORT || 5000;
