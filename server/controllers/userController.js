@@ -67,6 +67,38 @@ const userController = {
         .json({ error: "Error en el servidor", details: error.message });
     }
   },
+  getProfile: async (req, res) => {
+    try {
+      const user = await userRepository.getById(req.user.id);
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener perfil" });
+    }
+  },
+  update: async (req, res) => {
+    try {
+      const { username, email } = req.body;
+      const updatedUser = await userRepository.update(req.user.id, {
+        username,
+        email,
+      });
+      //quito hash
+      const { password_hash, ...userSafe } = updatedUser.toJSON();
+      res.json({ message: "Perfil actualizado", user: userSafe });
+    } catch (error) {
+      res.status(500).json({ error: "Error al actualizar" });
+    }
+  },
+  delete: async (req, res) => {
+    try {
+      await userRepository.deleteById(req.user.id);
+      res.json({
+        message: "Usuario eliminado correctamente.",
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Error al eliminar usuario" });
+    }
+  },
 };
 
 module.exports = userController;

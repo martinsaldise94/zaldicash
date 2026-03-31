@@ -7,8 +7,10 @@ module.exports = {
   insert(data) {
     return User.create(data);
   },
-  getById(id) {
-    return User.findByPk(id);
+  async getById(id) {
+    return await User.findByPk(id, {
+      attributes: { exclude: ["password_hash"] }, // Seguridad: nunca enviamos el hash
+    });
   },
   getByMail(email) {
     return User.findOne({
@@ -22,7 +24,7 @@ module.exports = {
     }
     return await user.update(data);
   },
-  deleteById(id) {
-    return User.destroy({ where: { id } });
+  async deleteById(id) {
+    return await User.destroy({ where: { id } });
   },
 };
