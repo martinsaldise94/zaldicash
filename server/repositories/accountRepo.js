@@ -6,13 +6,23 @@ module.exports = {
   },
 
   async findAllByUser(userId) {
-    return await Account.findAll({ 
+    return await Account.findAll({
       where: { userId },
-      order: [['createdAt', 'DESC']]
+      order: [["createdAt", "DESC"]],
     });
   },
 
   async findById(id, userId) {
     return await Account.findOne({ where: { id, userId } });
-  }
+  },
+  async update(id, userId, data) {
+    const account = await this.findById(id, userId);
+    if (account) return await account.update(data);
+    return null;
+  },
+  async delete(id, userId) {
+    return await Account.destroy({
+      where: { id, userId },
+    });
+  },
 };

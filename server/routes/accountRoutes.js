@@ -6,5 +6,7 @@ const accountValidation = require("../middlewares/accountValidation");
 
 router.post("/", auth, accountValidation, accountController.insert);
 router.get("/", auth, accountController.getMyAccounts);
+router.put("/:id", auth, accountController.updateAccount);
+router.delete("/:id", auth, accountController.deleteAccount);
 
 module.exports = router;
