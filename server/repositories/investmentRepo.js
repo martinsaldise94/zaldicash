@@ -47,31 +47,37 @@ module.exports = {
 
   // 3. FUNCIÓN DE REFRESCAR (La nueva)
   async updateLivePrices(userId) {
-    const investments = await Investment.findAll({
-      where: {
-        userId,
-        status: "active",
-        ticker: { [Op.ne]: null },
-      },
-    });
-    console.log(
-      `Inversiones con ticker encontradas para user ${userId}:`,
-      investments.length,
-    );
-    const results = [];
-    for (const inv of investments) {
-      if (inv.ticker) {
-        const data = await priceService.getLivePrice(inv.ticker);
-        if (data && data.price) {
-          await inv.update({ current_amount: data.price });
-          results.push({
-            name: inv.name,
-            ticker: inv.ticker,
-            new: parseFloat(data.price).toFixed(2),
-          });
-        }
-      }
+  const investments = await Investment.findAll({
+    where: {
+      userId,
+      status: "active",
+      ticker: { [Op.ne]: null },
+    },
+  });
+
+  const results = [];
+  for (const inv of investments) {
+    const data = await priceService.getLivePrice(inv.ticker);
+    
+    if (data && data.price) {
+      // LÓGICA CLAVE: Multiplicamos el precio por la cantidad
+      // Usamos parseFloat para asegurar que son números
+      const quantity = parseFloat(inv.quantity || 0);
+      const marketPrice = parseFloat(data.price);
+      const newCurrentAmount = quantity * marketPrice;
+
+      // Actualizamos el registro con el valor total de la posición
+      await inv.update({ current_amount: newCurrentAmount });
+
+      results.push({
+        name: inv.name,
+        ticker: inv.ticker,
+        precio_unidad: marketPrice.toFixed(2),
+        cantidad: quantity,
+        valor_total: newCurrentAmount.toFixed(2),
+      });
     }
-    return results;
-  },
+  }
+  return results;
+},
 }; // <--- IMPORTANTE: Todo debe estar dentro de estas llaves

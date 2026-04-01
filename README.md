@@ -11,6 +11,12 @@ Es común en las inversiones tener activos en distintas plataformas. Con Zaldica
 
 ## 📓 Diario de Desarrollador (DevLog)
 
+### 📅 2024-05-22 | Refactorización de Precisión 🎯
+- ✅ **Implementación de Quantity:** Añadida columna `quantity` a la base de datos y modelos.
+- ✅ **Cálculo de Mercado:** El sistema ahora multiplica `cantidad * precio_mercado` en lugar de sobreescribir el total.
+- ✅ **Migraciones Críticas:** Añadida columna `currency` a las cuentas para mayor realismo.
+- 🚀 **Resultado:** Una inversión de 0.015 BTC (1000€ iniciales) ahora refleja un valor real de 1021.74€.
+
 ### 📅 2024-05-22 | "El Gran Salto al Mercado Real" 🚀
 
 Hoy el proyecto ha dejado de ser una base de datos estática para conectarse al mundo real.
@@ -19,7 +25,7 @@ Hoy el proyecto ha dejado de ser una base de datos estática para conectarse al 
 
 - ✅ **Conexión con Yahoo Finance:** Implementado `priceServices.js` para obtener precios en tiempo real de Stocks y Cripto.
 - ✅ **Sincronización Masiva:** Creado el endpoint `GET /api/investments/refresh` que actualiza todos los `current_amount` de las inversiones activas del usuario de una sola vez.
-- ✅ **Dashboard Dinámico:** El resumen de patrimonio ahora refleja las fluctuaciones del mercado (¡Martín ya es rico!).
+- ✅ **Dashboard Dinámico:** El resumen de patrimonio ahora refleja las fluctuaciones del mercado.
 
 **Batallas ganadas (Bugs):**
 

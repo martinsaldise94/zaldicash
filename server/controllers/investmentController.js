@@ -13,7 +13,7 @@ const investmentController = {
         ticker,
         initial_amount,
         current_amount: initial_amount, // Al inicio son iguales
-        quantity: quantity || 1,
+        quantity: quantity || 0,
         userId,
         accountId,
       });

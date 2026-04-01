@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       balance: DataTypes.DECIMAL(15, 2),
       userId: DataTypes.INTEGER,
+      currency: DataTypes.STRING
     },
     {
       sequelize,
