@@ -9,18 +9,13 @@ const dashboardController = {
       res.json({
         status: "success",
         username: req.user.username,
-        data: {
-          total_patrimonio: summary.netWorth.toFixed(2),
-          dinero_en_cuentas: summary.cash.toFixed(2),
-          dinero_invertido: summary.invested.toFixed(2),
-          distribucion: {
-            efectivo: ((summary.cash / summary.netWorth) * 100).toFixed(1) + "%",
-            inversiones: ((summary.invested / summary.netWorth) * 100).toFixed(1) + "%"
-          }
-        }
+        data: summary // El resumen ya viene con netWorth, cash, invested y performance
       });
     } catch (error) {
-      res.status(500).json({ error: "Error al calcular el resumen", details: error.message });
+      res.status(500).json({ 
+        error: "Error al calcular el resumen", 
+        details: error.message 
+      });
     }
   }
 };

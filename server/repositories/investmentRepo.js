@@ -1,5 +1,11 @@
-const { Investment, Transaction, Account, sequelize, Sequelize } = require("../models");
-const { Op } = Sequelize; 
+const {
+  Investment,
+  Transaction,
+  Account,
+  sequelize,
+  Sequelize,
+} = require("../models");
+const { Op } = Sequelize;
 const priceService = require("../services/priceServices");
 
 module.exports = {
@@ -38,46 +44,61 @@ module.exports = {
 
   // 2. FUNCIÓN DE LISTAR
   async getByUserId(userId) {
-    return await Investment.findAll({
+    const investments = await Investment.findAll({
       where: { userId },
       include: ["account"],
       order: [["createdAt", "DESC"]],
     });
+
+    return investments.map((inv) => {
+      const current = parseFloat(inv.current_amount) || 0;
+      const initial = parseFloat(inv.initial_amount) || 0;
+      const profit = current - initial;
+      const pct = initial > 0 ? (profit / initial) * 100 : 0;
+
+      return {
+        ...inv.toJSON(),
+        profit: profit.toFixed(2),
+        profit_percentage: pct.toFixed(2),
+      };
+    });
   },
 
-  // 3. FUNCIÓN DE REFRESCAR (La nueva)
+  // 3. FUNCIÓN DE REFRESCAR
   async updateLivePrices(userId) {
-  const investments = await Investment.findAll({
-    where: {
-      userId,
-      status: "active",
-      ticker: { [Op.ne]: null },
-    },
-  });
+    const investments = await Investment.findAll({
+      where: {
+        userId,
+        status: "active",
+        ticker: { [Op.ne]: null },
+      },
+    });
 
-  const results = [];
-  for (const inv of investments) {
-    const data = await priceService.getLivePrice(inv.ticker);
-    
-    if (data && data.price) {
-      // LÓGICA CLAVE: Multiplicamos el precio por la cantidad
-      // Usamos parseFloat para asegurar que son números
-      const quantity = parseFloat(inv.quantity || 0);
-      const marketPrice = parseFloat(data.price);
-      const newCurrentAmount = quantity * marketPrice;
+    const results = [];
+    for (const inv of investments) {
+      const data = await priceService.getLivePrice(inv.ticker);
 
-      // Actualizamos el registro con el valor total de la posición
-      await inv.update({ current_amount: newCurrentAmount });
+      if (data && data.price) {
+        // LÓGICA CLAVE: Multiplicamos el precio por la cantidad
+        // Usamos parseFloat para asegurar que son números
+        const quantity = parseFloat(inv.quantity || 0);
+        const marketPrice = parseFloat(data.price);
+        const newCurrentAmount = quantity * marketPrice;
 
-      results.push({
-        name: inv.name,
-        ticker: inv.ticker,
-        precio_unidad: marketPrice.toFixed(2),
-        cantidad: quantity,
-        valor_total: newCurrentAmount.toFixed(2),
-      });
+        // Actualizamos el registro con el valor total de la posición
+        const initial = parseFloat(inv.initial_amount);
+        const profit = newCurrentAmount - initial;
+
+        results.push({
+          name: inv.name,
+          ticker: inv.ticker,
+          precio_unidad: marketPrice.toFixed(2),
+          cantidad: quantity,
+          valor_total: newCurrentAmount.toFixed(2),
+          ganancia: profit.toFixed(2), 
+        });
+      }
     }
-  }
-  return results;
-},
+    return results;
+  },
 }; // <--- IMPORTANTE: Todo debe estar dentro de estas llaves
