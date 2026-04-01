@@ -19,6 +19,17 @@ const investmentValidation = [
     .withMessage("Debes especificar una categoría (Cripto, Acciones, etc.)")
     .trim(),
 
+    //ticker
+  body("ticker")
+    .exists()
+    .withMessage("El ticker es obligatorio")
+    .notEmpty()
+    .withMessage("El ticker no puede estar vacío")
+    .isLength({ min: 1, max: 10 })
+    .withMessage("Ticker no válido")
+    .trim()
+    .toUpperCase(), 
+
   //cuenta de la que proviene
   body("accountId")
     .exists()

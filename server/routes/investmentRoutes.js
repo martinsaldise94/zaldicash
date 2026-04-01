@@ -7,5 +7,6 @@ const investmentValidation = require("../middlewares/investmentValidation");
 // Solo si el token es válido, se ejecutan estas funciones
 router.post("/", auth, investmentValidation, investmentController.create);
 router.get("/", auth, investmentController.listMyInvestments);
+router.get("/refresh", auth, investmentController.refreshPrices);
 
 module.exports = router;
