@@ -11,7 +11,15 @@ Es común en las inversiones tener activos en distintas plataformas. Con Zaldica
 
 ## 📓 Diario de Desarrollador (DevLog)
 
+### 📅 2024-05-22 | Control Total de Flujo de Caja 🏦
+
+- ✅ **Movimientos Manuales:** Creado el sistema de transacciones para ingresos y gastos fuera de inversiones.
+- ✅ **Integración de Saldos:** El saldo de las cuentas se sincroniza automáticamente al registrar una transacción gracias a `increment`/`decrement` de Sequelize.
+- ✅ **Arquitectura de Base de Datos:** Confirmado que `investmentId` queda como `null` en transacciones manuales, manteniendo la integridad de los datos.
+- 🚀 **Estado del Proyecto:** Backend 100% funcional para la gestión básica de finanzas e inversiones.
+
 ### 📅 2024-05-22 | Refactorización de Precisión 🎯
+
 - ✅ **Implementación de Quantity:** Añadida columna `quantity` a la base de datos y modelos.
 - ✅ **Cálculo de Mercado:** El sistema ahora multiplica `cantidad * precio_mercado` en lugar de sobreescribir el total.
 - ✅ **Migraciones Críticas:** Añadida columna `currency` a las cuentas para mayor realismo.
