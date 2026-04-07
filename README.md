@@ -11,6 +11,14 @@ Es común en las inversiones tener activos en distintas plataformas. Con Zaldica
 
 ## 📓 Diario de Desarrollador (DevLog) Redactado automáticamente.
 
+### 📅 2026-04-07 | Blindaje y Reglas de Negocio Finacieras 🛡️🏦
+
+- ✅ **Validación de Saldo Insuficiente:** Implementado bloqueo en transacciones manuales e inversiones. Ya no es posible tener saldos negativos por error.
+- ✅ **Protección de Integridad Referencial:** Bloqueado el borrado de cuentas que contengan saldo o inversiones activas vinculadas.
+- ✅ **Refactorización de Repositorios:** Movida la lógica de joins (`include`) y validaciones complejas al `accountRepo`, dejando los controladores limpios y legibles.
+- ✅ **Gestión de Errores Profesional:** El sistema ahora devuelve mensajes claros al usuario cuando una operación financiera no es viable.
+- 🚀 **Estado del Proyecto:** Backend Finalizado y Testeado. El "Motor" de ZaldiCash es ahora 100% fiable para ser consumido por el Frontend.
+
 ### 📅 2026-04-07 | Ciclo Bancario Completo e Inversiones 🔄💰
 
 - ✅ **Transferencias entre Cuentas:** Implementada la lógica de `type: "transfer"` para mover dinero entre cuentas del mismo usuario sin alterar el Patrimonio Neto.

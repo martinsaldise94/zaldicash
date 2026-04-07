@@ -11,36 +11,49 @@ const priceService = require("../services/priceServices");
 module.exports = {
   //  FUNCIÓN DE INSERTAR
   async insertWithTransaction(data) {
-    const t = await sequelize.transaction();
-    try {
-      const newInvestment = await Investment.create(data, { transaction: t });
+  const t = await sequelize.transaction();
+  try {
+    const { accountId, initial_amount, name, userId } = data;
 
-      await Transaction.create(
-        {
-          amount: data.initial_amount,
-          type: "expense",
-          description: `Inversión inicial en ${data.name}`,
-          userId: data.userId,
-          accountId: data.accountId,
-          investmentId: newInvestment.id,
-          date: new Date(),
-        },
-        { transaction: t },
-      );
+    // Buscamos la cuenta para validar saldo 
+    const account = await Account.findByPk(accountId, { transaction: t });
+    if (!account) throw new Error("Cuenta no encontrada");
 
-      const account = await Account.findByPk(data.accountId);
-      await account.decrement("balance", {
-        by: data.initial_amount,
-        transaction: t,
-      });
+    // VALIDACIÓN DE SALDO
+    const currentBalance = parseFloat(account.balance);
+    const cost = parseFloat(initial_amount);
 
-      await t.commit();
-      return newInvestment;
-    } catch (error) {
-      await t.rollback();
-      throw error;
+    if (currentBalance < cost) {
+      throw new Error(`Saldo insuficiente: Tienes ${currentBalance}€ y la inversión requiere ${cost}€`);
     }
-  },
+
+    //  Crear la inversión
+    const newInvestment = await Investment.create(data, { transaction: t });
+
+    //  Crear el movimiento en el historial (Gasto)
+    await Transaction.create({
+      amount: cost,
+      type: "expense",
+      description: `Inversión inicial en ${name}`,
+      userId: userId,
+      accountId: accountId,
+      investmentId: newInvestment.id, // Enlazamos para el historial
+      date: new Date(),
+    }, { transaction: t });
+
+    // Restar el dinero de la cuenta
+    await account.decrement("balance", {
+      by: cost,
+      transaction: t,
+    });
+
+    await t.commit();
+    return newInvestment;
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
+},
 
   //  FUNCIÓN DE LISTAR
   async getByUserId(userId, status = null) {

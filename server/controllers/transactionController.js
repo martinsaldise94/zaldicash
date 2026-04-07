@@ -23,6 +23,19 @@ createManual: async (req, res) => {
         const account = await accountRepo.findById(accountId, userId);
         if (!account) return res.status(404).json({ error: "Cuenta origen no encontrada" });
 
+        //Regla de no gastar más de lo que se tiene
+        const currentBalance = parseFloat(account.balance);
+        const amountNum = parseFloat(amount);
+
+        if ((type === "expense" || type === "transfer") && currentBalance < amountNum) {
+            await t.rollback();
+            return res.status(400).json({ 
+                error: "Saldo insuficiente para realizar esta operación.",
+                currentBalance: currentBalance,
+                required: amountNum
+            });
+        }
+
         //  Lógica según el tipo
         if (type === "transfer") {
             if (!toAccountId) return res.status(400).json({ error: "Falta la cuenta destino para la transferencia" });
