@@ -9,7 +9,16 @@ Es común en las inversiones tener activos en distintas plataformas. Con Zaldica
 
 ---
 
-## 📓 Diario de Desarrollador (DevLog)
+## 📓 Diario de Desarrollador (DevLog) Redactado automáticamente.
+
+### 📅 2026-04-07 | Ciclo Bancario Completo e Inversiones 🔄💰
+
+- ✅ **Transferencias entre Cuentas:** Implementada la lógica de `type: "transfer"` para mover dinero entre cuentas del mismo usuario sin alterar el Patrimonio Neto.
+- ✅ **Cierre de Inversiones (Ventas):** Creado el sistema de liquidación de activos donde el capital (más beneficios/pérdidas) vuelve automáticamente al balance de la cuenta origen.
+- ✅ **Estados de Inversión:** Las inversiones ahora transicionan de `active` a `closed`, permitiendo un historial de operaciones pasadas y optimizando el refresco de precios.
+- ✅ **Filtros Inteligentes:** Añadida capacidad de filtrado por `status` en la consulta de inversiones (`?status=active|closed`) para separar la cartera actual del historial.
+- ✅ **Atomicidad SQL:** Reforzada la seguridad de los datos mediante transacciones de Sequelize para garantizar que no se pierda dinero en operaciones complejas.
+- 🚀 **Estado del Proyecto:** Backend de Grado Producción; motor financiero blindado y listo para la integración con el Frontend.
 
 ### 📅 2024-05-22 | Control Total de Flujo de Caja 🏦
 
