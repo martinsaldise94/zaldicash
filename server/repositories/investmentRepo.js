@@ -43,9 +43,14 @@ module.exports = {
   },
 
   //  FUNCIÓN DE LISTAR
-  async getByUserId(userId) {
+  async getByUserId(userId, status = null) {
+    const whereClause = { userId };
+    if (status) {
+      whereClause.status = status; // Ej: 'active' o 'closed'
+    }
+
     const investments = await Investment.findAll({
-      where: { userId },
+      where: whereClause,
       include: ["account"],
       order: [["createdAt", "DESC"]],
     });
@@ -95,7 +100,7 @@ module.exports = {
           precio_unidad: marketPrice.toFixed(2),
           cantidad: quantity,
           valor_total: newCurrentAmount.toFixed(2),
-          ganancia: profit.toFixed(2), 
+          ganancia: profit.toFixed(2),
         });
       }
     }
@@ -103,46 +108,48 @@ module.exports = {
   },
   //vender
   async sell(investmentId, userId) {
-  const t = await sequelize.transaction();
-  try {
-    const inv = await Investment.findOne({ 
-      where: { id: investmentId, userId, status: 'active' },
-      include: ['account'] 
-    });
+    const t = await sequelize.transaction();
+    try {
+      const inv = await Investment.findOne({
+        where: { id: investmentId, userId, status: "active" },
+        include: ["account"],
+      });
 
-    if (!inv) throw new Error("Inversión no encontrada o ya cerrada");
+      if (!inv) throw new Error("Inversión no encontrada o ya cerrada");
 
-    const sellAmount = parseFloat(inv.current_amount);
+      const sellAmount = parseFloat(inv.current_amount);
 
-    //  Devolver el dinero a la cuenta vinculada
-    await Account.increment('balance', { 
-      by: sellAmount, 
-      where: { id: inv.accountId },
-      transaction: t 
-    });
+      //  Devolver el dinero a la cuenta vinculada
+      await Account.increment("balance", {
+        by: sellAmount,
+        where: { id: inv.accountId },
+        transaction: t,
+      });
 
-    //  Crear la transacción de historial
-    await Transaction.create({
-      amount: sellAmount,
-      type: 'income',
-      description: `Venta total de ${inv.name} (Cierre de posición)`,
-      userId,
-      accountId: inv.accountId,
-      investmentId: inv.id,
-      date: new Date()
-    }, { transaction: t });
+      //  Crear la transacción de historial
+      await Transaction.create(
+        {
+          amount: sellAmount,
+          type: "income",
+          description: `Venta total de ${inv.name} (Cierre de posición)`,
+          userId,
+          accountId: inv.accountId,
+          investmentId: inv.id,
+          date: new Date(),
+        },
+        { transaction: t },
+      );
 
-    //  Marcar inversión como cerrada
-    inv.status = 'closed';
-   
-   
-    await inv.save({ transaction: t });
+      //  Marcar inversión como cerrada
+      inv.status = "closed";
 
-    await t.commit();
-    return inv;
-  } catch (error) {
-    await t.rollback();
-    throw error;
-  }
-}
+      await inv.save({ transaction: t });
+
+      await t.commit();
+      return inv;
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
+  },
 };

@@ -33,7 +33,8 @@ const investmentController = {
 
   listMyInvestments: async (req, res) => {
     try {
-      const investments = await investmentRepo.getByUserId(req.user.id);
+      const { status } = req.query;
+      const investments = await investmentRepo.getByUserId(req.user.id,status);
       res.json(investments);
     } catch (error) {
       res.status(500).json({ error: "Error al obtener inversiones" });
