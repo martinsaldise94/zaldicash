@@ -8,5 +8,6 @@ const investmentValidation = require("../middlewares/investmentValidation");
 router.post("/", auth, investmentValidation, investmentController.create);
 router.get("/", auth, investmentController.listMyInvestments);
 router.get("/refresh", auth, investmentController.refreshPrices);
+router.post("/:id/sell", auth, investmentController.sell);
 
 module.exports = router;

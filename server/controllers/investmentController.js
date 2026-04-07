@@ -54,6 +54,21 @@ const investmentController = {
         .json({ error: "Error al actualizar precios", details: error.message });
     }
   },
+  sell: async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    
+    const closedInv = await investmentRepo.sell(id, userId);
+    
+    res.json({ 
+      message: "Inversión cerrada con éxito. El capital ha vuelto a tu cuenta.", 
+      investment: closedInv 
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error al vender", details: error.message });
+  }
+}
 };
 
 module.exports = investmentController;

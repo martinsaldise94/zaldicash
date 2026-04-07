@@ -9,7 +9,7 @@ const { Op } = Sequelize;
 const priceService = require("../services/priceServices");
 
 module.exports = {
-  // 1. FUNCIÓN DE INSERTAR
+  //  FUNCIÓN DE INSERTAR
   async insertWithTransaction(data) {
     const t = await sequelize.transaction();
     try {
@@ -42,7 +42,7 @@ module.exports = {
     }
   },
 
-  // 2. FUNCIÓN DE LISTAR
+  //  FUNCIÓN DE LISTAR
   async getByUserId(userId) {
     const investments = await Investment.findAll({
       where: { userId },
@@ -64,7 +64,7 @@ module.exports = {
     });
   },
 
-  // 3. FUNCIÓN DE REFRESCAR
+  //  FUNCIÓN DE REFRESCAR
   async updateLivePrices(userId) {
     const investments = await Investment.findAll({
       where: {
@@ -101,4 +101,48 @@ module.exports = {
     }
     return results;
   },
-}; // <--- IMPORTANTE: Todo debe estar dentro de estas llaves
+  //vender
+  async sell(investmentId, userId) {
+  const t = await sequelize.transaction();
+  try {
+    const inv = await Investment.findOne({ 
+      where: { id: investmentId, userId, status: 'active' },
+      include: ['account'] 
+    });
+
+    if (!inv) throw new Error("Inversión no encontrada o ya cerrada");
+
+    const sellAmount = parseFloat(inv.current_amount);
+
+    //  Devolver el dinero a la cuenta vinculada
+    await Account.increment('balance', { 
+      by: sellAmount, 
+      where: { id: inv.accountId },
+      transaction: t 
+    });
+
+    //  Crear la transacción de historial
+    await Transaction.create({
+      amount: sellAmount,
+      type: 'income',
+      description: `Venta total de ${inv.name} (Cierre de posición)`,
+      userId,
+      accountId: inv.accountId,
+      investmentId: inv.id,
+      date: new Date()
+    }, { transaction: t });
+
+    //  Marcar inversión como cerrada
+    inv.status = 'closed';
+   
+   
+    await inv.save({ transaction: t });
+
+    await t.commit();
+    return inv;
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
+}
+};
