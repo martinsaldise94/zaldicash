@@ -1,11 +1,20 @@
 const { body, validationResult } = require("express-validator");
 
 const transactionValidation = [
-  body("amount").isFloat({ min: 0.01 }).withMessage("La cantidad debe ser mayor a 0"),
-  body("type").isIn(["income", "expense"]).withMessage("El tipo debe ser 'income' o 'expense'"),
+  body("amount")
+    .isFloat({ min: 0.01 })
+    .withMessage("La cantidad debe ser mayor a 0"),
+  body("type")
+    .isIn(["income", "expense", "transfer"])
+    .withMessage("El tipo debe ser 'income' , 'expense' o 'transfer'"),
   body("accountId").isInt().withMessage("ID de cuenta inválido"),
   body("description").optional().isString().trim(),
-  
+
+  //si es transfer, validamos que exista la cuenta destino
+  body("toAccountId").if(body("type").equals("transfer"))
+    .notEmpty().withMessage("La cuenta destino es obligatoria para transferencias")
+    .isInt().withMessage("ID de cuenta destino inválido"),
+
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

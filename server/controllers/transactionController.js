@@ -13,42 +13,48 @@ const transactionController = {
     }
   },
 // funcion para introducir manualmente una cantidad
-  createManual: async (req, res) => {
+createManual: async (req, res) => {
     const t = await sequelize.transaction();
     try {
-      const { amount, type, description, accountId } = req.body;
-      const userId = req.user.id;
+        const { amount, type, description, accountId, toAccountId } = req.body;
+        const userId = req.user.id;
 
-      // 1. Usamos accountRepo para validar la propiedad de la cuenta
-      const account = await accountRepo.findById(accountId, userId);
-      if (!account) {
-        return res.status(404).json({ error: "Cuenta no encontrada" });
-      }
+        //  Validar cuenta origen
+        const account = await accountRepo.findById(accountId, userId);
+        if (!account) return res.status(404).json({ error: "Cuenta origen no encontrada" });
 
-      // 2. nuevo movimiento
-      const newTx = await Transaction.create({
-        amount,
-        type,
-        description,
-        accountId,
-        userId,
-        date: new Date(),
-      }, { transaction: t });
+        //  Lógica según el tipo
+        if (type === "transfer") {
+            if (!toAccountId) return res.status(400).json({ error: "Falta la cuenta destino para la transferencia" });
+            
+            const destinationAccount = await accountRepo.findById(toAccountId, userId);
+            if (!destinationAccount) return res.status(404).json({ error: "Cuenta destino no encontrada" });
 
-      // 3. Actualizar saldo usando métodos atómicos de Sequelize (esto lo he sacado de la ia)
-      if (type === "income") {
-        await account.increment("balance", { by: amount, transaction: t });
-      } else {
-        await account.decrement("balance", { by: amount, transaction: t });
-      }
+            // Restamos de origen, sumamos en destino
+            await account.decrement("balance", { by: amount, transaction: t });
+            await destinationAccount.increment("balance", { by: amount, transaction: t });
 
-      await t.commit();
-      res.status(201).json({ message: "Movimiento registrado con éxito", transaction: newTx });
+            // Registramos el movimiento
+            await Transaction.create({
+                amount, type, description: description || `Transferencia a ${destinationAccount.name}`,
+                accountId, userId, date: new Date()
+            }, { transaction: t });
+
+        } else if (type === "income") {
+            await account.increment("balance", { by: amount, transaction: t });
+            await Transaction.create({ amount, type, description, accountId, userId, date: new Date() }, { transaction: t });
+        } else if (type === "expense") {
+            await account.decrement("balance", { by: amount, transaction: t });
+            await Transaction.create({ amount, type, description, accountId, userId, date: new Date() }, { transaction: t });
+        }
+
+        await t.commit();
+        res.status(201).json({ message: "Operación realizada con éxito" });
     } catch (error) {
-      await t.rollback();
-      res.status(500).json({ error: "Error al procesar el movimiento", details: error.message });
+        await t.rollback();
+        res.status(500).json({ error: "Error al procesar el movimiento", details: error.message });
     }
-  },
+}
 };
 
 module.exports = transactionController;
