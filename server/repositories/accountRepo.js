@@ -1,4 +1,4 @@
-const { Account } = require("../models");
+const { Account, Investment } = require("../models"); 
 
 module.exports = {
   async insert(data) {
@@ -23,6 +23,18 @@ module.exports = {
   async delete(id, userId) {
     return await Account.destroy({
       where: { id, userId },
+    });
+  },
+  async findByIdWithActiveInvestments(id, userId) {
+    //para buscar cuentas con inversiones que siguen en activo 
+    return await Account.findOne({
+      where: { id, userId },
+      include: [{
+        model: Investment,
+        as: "investments",
+        where: { status: "active" },
+        required: false, 
+      }],
     });
   },
 };

@@ -48,20 +48,40 @@ const accountController = {
       res.status(500).json({ error: "Error al actualizar la cuenta" });
     }
   },
-  async deleteAccount(req, res) {
-    try {
-      const { id } = req.params;
-      const userId = req.user.id;
-      const result = await accountRepo.delete(id, userId);
+ async deleteAccount(req, res) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
 
-      if (!result)
-        return res.status(404).json({ error: "No se pudo borrar la cuenta" });
+    
+    const account = await accountRepo.findByIdWithActiveInvestments(id, userId);
 
-      res.json({ message: "Cuenta eliminada correctamente" });
-    } catch (error) {
-      res.status(500).json({ error: "Error al eliminar la cuenta" });
+    if (!account) {
+      return res.status(404).json({ error: "Cuenta no encontrada" });
     }
-  },
+
+    // Regla 1: Saldo 0
+    if (parseFloat(account.balance) !== 0) {
+      return res.status(400).json({ 
+        error: "No puedes borrar una cuenta con saldo positivo o negativo." 
+      });
+    }
+
+    // Regla 2: Sin inversiones vivas
+    if (account.investments && account.investments.length > 0) {
+      return res.status(400).json({ 
+        error: "No puedes borrar la cuenta porque tiene inversiones activas vinculadas." 
+      });
+    }
+
+    // Si todo OK, borramos
+    await accountRepo.delete(id, userId);
+    res.json({ message: "Cuenta eliminada con éxito." });
+
+  } catch (error) {
+    res.status(500).json({ error: "Error al borrar cuenta", details: error.message });
+  }
+}
 };
 
 module.exports = accountController;
